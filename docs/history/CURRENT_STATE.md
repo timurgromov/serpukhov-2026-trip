@@ -20,8 +20,8 @@
 
 ## Публикация
 
-Плановый публичный адрес:
+Публичный адрес:
 
 `https://timurgromov.github.io/serpukhov-2026-trip/`
 
-Статус публикации обновляется после успешного GitHub Pages deploy.
+GitHub Pages настроен через GitHub Actions. Production-страница, интерактивная карта и фильтры проверены в браузере; ошибок в console нет.
