@@ -1,0 +1,269 @@
+---
+import trip from "../data/trip.json";
+import "leaflet/dist/leaflet.css";
+
+const pointCount = trip.map.points.length;
+const mapPayload = JSON.stringify({
+  points: trip.map.points,
+  routes: trip.map.routes,
+  typeLabels: trip.map.typeLabels,
+  routeLabels: trip.map.routeLabels
+});
+---
+
+<section class="map-shell" aria-labelledby="map-title">
+  <div class="map-copy">
+    <div>
+      <p class="eyebrow">Карта маршрута</p>
+      <h2 id="map-title">{pointCount} точек без географической каши</h2>
+    </div>
+    <p>
+      Цифры показывают основной порядок, <strong>ALT</strong> — варианты на замену.
+      Линии объясняют последовательность, а не повторяют автомобильные дороги.
+      По умолчанию карта приближена к Серпухову; весь путь до Солнцева открывается отдельной кнопкой.
+    </p>
+  </div>
+
+  <div class="map-legend" aria-label="Легенда карты">
+    <span><i class="dot day1"></i>28 июля</span>
+    <span><i class="dot day2"></i>29 июля</span>
+    <span><i class="dot food"></i>Еда</span>
+    <span><i class="dot stay"></i>Ночёвка</span>
+    <span><i class="dot optional"></i>Optional</span>
+  </div>
+
+  <div class="route-explainer">
+    <article>
+      <span class="line-sample day1"></span>
+      <div>
+        <strong>{trip.map.routeLabels.day1}</strong>
+        <p>Монастырь → Нара → исторический центр → южный кластер → ужин.</p>
+      </div>
+    </article>
+    <article>
+      <span class="line-sample day2"></span>
+      <div>
+        <strong>{trip.map.routeLabels.day2}</strong>
+        <p>Отель → музей → заповедник → Солнцево.</p>
+      </div>
+    </article>
+    <article>
+      <span class="line-sample alternative"></span>
+      <div>
+        <strong>{trip.map.routeLabels.alternative}</strong>
+        <p>Пляжи, теплоход и страусы заменяют блоки, а не добавляются сверху.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="map-layout">
+    <div class="map-stage">
+      <div id="route-map" class="route-map" aria-label="Интерактивная карта поездки в Серпухов"></div>
+      <div class="map-view-switch" aria-label="Масштаб карты">
+        <button type="button" class="active" data-view="city">Серпухов</button>
+        <button type="button" data-view="full">Весь маршрут</button>
+      </div>
+    </div>
+    <aside class="route-panel" aria-label="Точки маршрута">
+      <div class="map-filters" aria-label="Фильтр точек карты">
+        <button type="button" class="active" data-filter="all">Все</button>
+        <button type="button" data-filter="day1">28 июля</button>
+        <button type="button" data-filter="day2">29 июля</button>
+        <button type="button" data-filter="food">Еда</button>
+        <button type="button" data-filter="stay">Ночёвка</button>
+        <button type="button" data-filter="optional">Optional</button>
+      </div>
+      <nav id="route-list" class="route-list" aria-label="Точки маршрута"></nav>
+      <p id="route-empty" class="route-empty" hidden>Для этого фильтра нет точек.</p>
+    </aside>
+  </div>
+  <script id="route-map-data" type="application/json" set:html={mapPayload} is:inline></script>
+</section>
+
+<script>
+  import L from "leaflet";
+
+  type RouteType = "day1" | "day2" | "food" | "stay" | "optional";
+
+  type RoutePoint = {
+    order: number;
+    label: string;
+    title: string;
+    type: RouteType;
+    dateLabel: string;
+    role: string;
+    lat: number;
+    lng: number;
+    description: string;
+    navigateUrl: string;
+  };
+
+  type MapPayload = {
+    points: RoutePoint[];
+    routes: {
+      day1: number[];
+      day2: number[];
+      alternative: number[][];
+    };
+    typeLabels: Record<RouteType, string>;
+  };
+
+  const payloadEl = document.getElementById("route-map-data");
+  const mapEl = document.getElementById("route-map");
+  const listEl = document.getElementById("route-list");
+  const emptyEl = document.getElementById("route-empty");
+  const filterButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".map-filters button"));
+  const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".map-view-switch button"));
+
+  if (payloadEl && mapEl && listEl && emptyEl) {
+    const routeListEl = listEl;
+    const routeEmptyEl = emptyEl;
+    const data = JSON.parse(payloadEl.textContent || "{}") as MapPayload;
+    const pointsByOrder = new Map(data.points.map((point) => [point.order, point]));
+
+    const map = L.map(mapEl, {
+      zoomControl: true,
+      scrollWheelZoom: false
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const markers = new Map<number, L.Marker>();
+    const markerLayer = L.layerGroup().addTo(map);
+    const fullBounds = L.latLngBounds(data.points.map((point) => [point.lat, point.lng]));
+    const cityBounds = L.latLngBounds(
+      data.points.filter((point) => point.order !== 1 && point.order !== 13).map((point) => [point.lat, point.lng])
+    );
+
+    function iconFor(point: RoutePoint) {
+      return L.divIcon({
+        className: "",
+        html: `<span class="number-marker ${point.type}">${point.label}</span>`,
+        iconSize: point.label === "ALT" ? [42, 34] : [34, 34],
+        iconAnchor: point.label === "ALT" ? [21, 17] : [17, 17],
+        popupAnchor: [0, -18]
+      });
+    }
+
+    function popupFor(point: RoutePoint) {
+      return `
+        <article class="map-popup">
+          <p class="popup-kicker">${data.typeLabels[point.type]}</p>
+          <h3>${point.title}</h3>
+          <p class="popup-date">${point.dateLabel}</p>
+          <p>${point.description}</p>
+          <a href="${point.navigateUrl}" target="_blank" rel="noreferrer">Открыть навигацию ↗</a>
+        </article>
+      `;
+    }
+
+    data.points.forEach((point) => {
+      const marker = L.marker([point.lat, point.lng], {
+        icon: iconFor(point),
+        title: `${point.label}. ${point.title}`
+      });
+      marker.bindPopup(popupFor(point));
+      marker.addTo(markerLayer);
+      markers.set(point.order, marker);
+    });
+
+    function routeLine(orders: number[]) {
+      return orders
+        .map((order) => pointsByOrder.get(order))
+        .filter((point): point is RoutePoint => Boolean(point))
+        .map((point) => [point.lat, point.lng] as [number, number]);
+    }
+
+    L.polyline(routeLine(data.routes.day1), {
+      color: "#c45732",
+      weight: 4,
+      opacity: 0.86
+    }).addTo(map);
+
+    L.polyline(routeLine(data.routes.day2), {
+      color: "#126b62",
+      weight: 4,
+      opacity: 0.86
+    }).addTo(map);
+
+    data.routes.alternative.forEach((route) => {
+      L.polyline(routeLine(route), {
+        color: "#826624",
+        weight: 2.5,
+        opacity: 0.72,
+        dashArray: "5 8"
+      }).addTo(map);
+    });
+
+    function fitCity() {
+      map.invalidateSize();
+      map.fitBounds(cityBounds.pad(0.13));
+    }
+
+    function fitFull() {
+      map.invalidateSize();
+      map.fitBounds(fullBounds.pad(0.08));
+    }
+
+    function createPointCard(point: RoutePoint) {
+      const card = document.createElement("article");
+      card.className = "route-point";
+      card.innerHTML = `
+        <button type="button" class="point-focus">
+          <span class="point-num ${point.type}">${point.label}</span>
+          <span class="point-copy">
+            <strong>${point.title}</strong>
+            <small class="route-date">${point.dateLabel}</small>
+            <small>${data.typeLabels[point.type]} · ${point.role}</small>
+          </span>
+        </button>
+        <a class="point-nav" href="${point.navigateUrl}" target="_blank" rel="noreferrer" aria-label="Открыть навигацию: ${point.title}">↗</a>
+      `;
+
+      card.querySelector(".point-focus")?.addEventListener("click", () => {
+        map.setView([point.lat, point.lng], Math.max(map.getZoom(), 14), { animate: true });
+        markers.get(point.order)?.openPopup();
+      });
+      return card;
+    }
+
+    function renderPointList(filter = "all") {
+      routeListEl.innerHTML = "";
+      const visiblePoints = data.points.filter((point) => filter === "all" || point.type === filter);
+
+      markerLayer.clearLayers();
+      visiblePoints.forEach((point) => {
+        routeListEl.appendChild(createPointCard(point));
+        const marker = markers.get(point.order);
+        if (marker) marker.addTo(markerLayer);
+      });
+
+      routeEmptyEl.hidden = visiblePoints.length > 0;
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        filterButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        renderPointList(button.dataset.filter || "all");
+      });
+    });
+
+    viewButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        viewButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        if (button.dataset.view === "full") fitFull();
+        else fitCity();
+      });
+    });
+
+    renderPointList();
+    fitCity();
+    window.addEventListener("load", () => window.setTimeout(fitCity, 250));
+    window.addEventListener("resize", () => window.setTimeout(() => map.invalidateSize(), 120));
+  }
+</script>

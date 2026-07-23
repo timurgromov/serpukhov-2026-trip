@@ -1,0 +1,311 @@
+---
+import RouteMap from "../components/RouteMap.astro";
+import trip from "../data/trip.json";
+import "../styles/global.css";
+
+const baseUrl = import.meta.env.BASE_URL;
+const primaryLodging = trip.lodgingOptions[0];
+const navItems = [
+  ["plan", "План"],
+  ["map", "Карта"],
+  ["days", "По времени"],
+  ["choice", "Выбор дня 2"],
+  ["stay", "Ночёвка"],
+  ["food", "Еда"],
+  ["book", "Забронировать"]
+];
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Маршрут из Солнцево в Серпухов на 28–29 июля 2026: карта, тайминг, музей, зубры, еда и ночёвка."
+    />
+    <meta name="theme-color" content="#183f3a" />
+    <link rel="icon" type="image/svg+xml" href={`${baseUrl}/favicon.svg?v=1`} />
+    <title>{trip.title} — маршрут</title>
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="topbar" aria-label="Основная навигация">
+        <a href={baseUrl} class="brand" aria-label="К началу страницы">
+          <span class="brand-mark">С</span>
+          <span>Серпухов 2026</span>
+        </a>
+        <div class="top-links">
+          <a href="#map">Карта</a>
+          <a href="#days">Тайминг</a>
+          <a href="#stay">Ночёвка</a>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow light">Короткое путешествие из Москвы</p>
+          <h1>Два дня.<br />Один спокойный маршрут.</h1>
+          <p class="lead">{trip.subtitle}</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#map">Открыть карту</a>
+            <a class="button ghost" href="#days">Смотреть план</a>
+          </div>
+        </div>
+        <aside class="recommendation-card" aria-label="Главная рекомендация">
+          <div class="recommendation-topline">
+            <span class="decision-icon" aria-hidden="true">✓</span>
+            <span>Рабочее решение</span>
+          </div>
+          <h2>{trip.recommendation.title}</h2>
+          <p>{trip.recommendation.summary}</p>
+          <small>{trip.recommendation.confidence}</small>
+        </aside>
+      </div>
+
+      <div class="fact-strip" aria-label="Краткая сводка">
+        {trip.facts.map((fact) => (
+          <article>
+            <span>{fact.label}</span>
+            <strong>{fact.value}</strong>
+            <small>{fact.note}</small>
+          </article>
+        ))}
+      </div>
+    </header>
+
+    <nav class="section-tabs" aria-label="Разделы маршрута">
+      {navItems.map(([href, label]) => <a href={`#${href}`}>{label}</a>)}
+    </nav>
+
+    <main>
+      <section id="plan" class="section intro">
+        <div>
+          <p class="eyebrow">Главная логика</p>
+          <h2>Не пытаться уместить весь список в два дня</h2>
+        </div>
+        <div class="intro-copy">
+          <p>
+            Во вторник собираем красивую городскую дугу от Высоцкого монастыря через Принарский парк и набережную Нары к Соборной горе.
+            В среду берём только два сильных якоря — музей и зубров — после чего едем домой.
+          </p>
+          <p>
+            Страусиная ферма, теплоход и пляжные зоны остаются честными альтернативами. Они не должны превращать поездку в цепочку опозданий.
+          </p>
+        </div>
+      </section>
+
+      <section class="section constraint-section" aria-labelledby="constraints-title">
+        <div class="section-head compact">
+          <p class="eyebrow">Что изменило маршрут</p>
+          <h2 id="constraints-title">Три ограничения, которые нельзя игнорировать</h2>
+        </div>
+        <div class="alert-grid">
+          {trip.alerts.map((alert) => (
+            <article class={`alert-card ${alert.level}`}>
+              <div class="alert-icon" aria-hidden="true">
+                {alert.level === "critical" ? "!" : alert.level === "warning" ? "≈" : "i"}
+              </div>
+              <div>
+                <h3>{alert.title}</h3>
+                <p>{alert.text}</p>
+                <a href={alert.sourceUrl} target="_blank" rel="noreferrer">{alert.sourceLabel} ↗</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div id="map">
+        <RouteMap />
+      </div>
+
+      <section id="days" class="section">
+        <div class="section-head">
+          <p class="eyebrow">По времени</p>
+          <h2>Основной сценарий</h2>
+          <p>Тайминг специально оставляет воздух: optional-точки можно убрать без разрушения всего дня.</p>
+        </div>
+        <div class="day-grid">
+          {trip.days.map((day, dayIndex) => (
+            <article class={`day-column day-${dayIndex + 1}`}>
+              <header class="day-header">
+                <div class="day-number">0{dayIndex + 1}</div>
+                <div>
+                  <p>{day.date} · {day.weekday}</p>
+                  <h3>{day.title}</h3>
+                  <span>{day.theme}</span>
+                </div>
+              </header>
+              <ol class="day-timeline">
+                {day.stops.map((stop) => (
+                  <li class={stop.status === "optional" ? "is-optional" : ""}>
+                    <time>{stop.time}</time>
+                    <div class="timeline-marker" aria-hidden="true"></div>
+                    <div class="timeline-copy">
+                      <div>
+                        <h4>{stop.title}</h4>
+                        <span>{stop.duration}</span>
+                      </div>
+                      <p>{stop.plan}</p>
+                      {stop.status === "optional" && <small>OPTIONAL · можно пропустить</small>}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="choice" class="section decision-section">
+        <div class="section-head">
+          <p class="eyebrow">Главная развилка</p>
+          <h2>29 июля: искусство или две фермы</h2>
+          <p>Оба варианта хорошие. Плох только третий — пытаться сделать всё сразу.</p>
+        </div>
+        <div class="choice-grid">
+          {trip.dayTwoOptions.map((option, index) => (
+            <article class={`choice-card ${index === 0 ? "recommended" : ""}`}>
+              <div class="card-topline">
+                <span>Сценарий {index + 1}</span>
+                <strong>{option.badge}</strong>
+              </div>
+              <h3>{option.title}</h3>
+              <p>{option.summary}</p>
+              <div class="tradeoff">
+                <span>Компромисс</span>
+                <p>{option.tradeoff}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="stay" class="section">
+        <div class="stay-recommendation">
+          <div>
+            <p class="eyebrow light">Ночёвка</p>
+            <h2>Сначала проверить «Провинцию»</h2>
+            <p>
+              Центр выигрывает не атмосферой природы, а логистикой: ранний завтрак, музей к открытию и выезд к зубрам без возврата из загородного дома.
+            </p>
+          </div>
+          <a class="button pale" href={primaryLodging.bookingUrl} target="_blank" rel="noreferrer">Проверить варианты ↗</a>
+        </div>
+        <div class="lodging-grid">
+          {trip.lodgingOptions.map((option) => (
+            <article class={`lodging-card ${option.id === "province" ? "featured" : ""}`}>
+              <div class="card-topline">
+                <span>{option.area}</span>
+                <strong>{option.badge}</strong>
+              </div>
+              <h3>{option.title}</h3>
+              <div class="pros-cons">
+                <div>
+                  <h4>Плюсы</h4>
+                  <ul>
+                    {option.pros.map((item) => <li>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <h4>Минусы</h4>
+                  <ul>
+                    {option.cons.map((item) => <li>{item}</li>)}
+                  </ul>
+                </div>
+              </div>
+              <div class="card-links">
+                <a href={option.url} target="_blank" rel="noreferrer">Сайт ↗</a>
+                <a href={option.bookingUrl} target="_blank" rel="noreferrer">Проверить даты ↗</a>
+              </div>
+            </article>
+          ))}
+        </div>
+        <p class="data-note">
+          Наличие и финальная цена на 28→29 июля сейчас не подтверждены: для корректной проверки нужно знать состав гостей и желаемый бюджет.
+        </p>
+      </section>
+
+      <section id="food" class="section food-section">
+        <div class="section-head">
+          <p class="eyebrow">Еда</p>
+          <h2>Одно место — одна роль</h2>
+          <p>Не дублируем рестораны ради галочки: «Овсянка» на обед, «Фабрикант» на главный вечер.</p>
+        </div>
+        <div class="food-grid">
+          {trip.food.map((place, index) => (
+            <article class={index === 0 ? "featured" : ""}>
+              <span>{place.role}</span>
+              <h3>{place.title}</h3>
+              <p>{place.note}</p>
+              <a href={place.url} target="_blank" rel="noreferrer">Подробнее ↗</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="section optional-section">
+        <div class="section-head">
+          <p class="eyebrow">Не потеряно, а вынесено за скобки</p>
+          <h2>Optional-точки и почему они не в основном плане</h2>
+        </div>
+        <div class="optional-list">
+          {trip.optionalNotes.map((item) => (
+            <article>
+              <div>
+                <span>{item.status}</span>
+                <h3>{item.title}</h3>
+              </div>
+              <p>{item.text}</p>
+              <a href={item.url} target="_blank" rel="noreferrer">Проверить ↗</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="book" class="section booking-section">
+        <div class="booking-copy">
+          <p class="eyebrow light">Следующий шаг</p>
+          <h2>Пять действий — и маршрут готов</h2>
+          <p>Сначала жильё и два временных якоря. Всё остальное можно решать по погоде.</p>
+        </div>
+        <ol class="booking-list">
+          {trip.bookingChecklist.map((item, index) => (
+            <li>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{item}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section class="section sources-section">
+        <details>
+          <summary>Источники и актуальность</summary>
+          <div class="sources-grid">
+            {trip.sources.map((source) => (
+              <a href={source.url} target="_blank" rel="noreferrer">
+                <strong>{source.title}</strong>
+                <span>{source.note}</span>
+              </a>
+            ))}
+          </div>
+          <p>Проверено {trip.updatedAt}. Расписания и дорожное время нужно повторно проверить перед поездкой.</p>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <p>Серпухов · 28–29 июля 2026</p>
+      <span>Маршрут собран для спокойной поездки, а не для рекорда по числу точек.</span>
+    </footer>
+
+    <nav class="mobile-dock" aria-label="Быстрая навигация">
+      <a href="#map"><span aria-hidden="true">⌖</span>Карта</a>
+      <a href="#days"><span aria-hidden="true">◷</span>План</a>
+      <a href="#book"><span aria-hidden="true">✓</span>Дела</a>
+    </nav>
+  </body>
+</html>
