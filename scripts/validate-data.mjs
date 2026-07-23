@@ -72,6 +72,7 @@ for (const section of [
   "alerts",
   "dayTwoOptions",
   "lodgingOptions",
+  "mealPlan",
   "food",
   "optionalNotes",
   "bookingChecklist",

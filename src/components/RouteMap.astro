@@ -3,8 +3,18 @@ import trip from "../data/trip.json";
 import "leaflet/dist/leaflet.css";
 
 const pointCount = trip.map.points.length;
+const primaryOrders = [
+  ...trip.map.routes.day1,
+  ...trip.map.routes.day2.filter((order) => !trip.map.routes.day1.includes(order))
+];
+const orderRank = new Map(primaryOrders.map((order, index) => [order, index]));
+const orderedPoints = [...trip.map.points].sort((a, b) => {
+  const aRank = orderRank.get(a.order) ?? Number.MAX_SAFE_INTEGER;
+  const bRank = orderRank.get(b.order) ?? Number.MAX_SAFE_INTEGER;
+  return aRank - bRank;
+});
 const mapPayload = JSON.stringify({
-  points: trip.map.points,
+  points: orderedPoints,
   routes: trip.map.routes,
   typeLabels: trip.map.typeLabels,
   routeLabels: trip.map.routeLabels
@@ -37,14 +47,14 @@ const mapPayload = JSON.stringify({
       <span class="line-sample day1"></span>
       <div>
         <strong>{trip.map.routeLabels.day1}</strong>
-        <p>Монастырь → Нара → исторический центр → южный кластер → ужин.</p>
+        <p>Обед → монастырь → Нара → исторический центр → южный кластер → ужин.</p>
       </div>
     </article>
     <article>
       <span class="line-sample day2"></span>
       <div>
         <strong>{trip.map.routeLabels.day2}</strong>
-        <p>Отель → музей → заповедник → Солнцево.</p>
+        <p>Отель → «Овсянка» → музей → ланч → зубры → Солнцево.</p>
       </div>
     </article>
     <article>

@@ -1219,6 +1219,87 @@ h3 {
   padding-top: 0;
 }
 
+.meal-plan {
+  display: grid;
+  margin-bottom: 50px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.meal-plan article {
+  display: grid;
+  min-height: 150px;
+  padding: 22px;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #f7f2ea;
+}
+
+.meal-plan article > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.meal-plan span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meal-plan time {
+  color: var(--terracotta-dark);
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.meal-plan strong {
+  color: var(--day-two);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meal-plan h3 {
+  margin: 7px 0 8px;
+  font-size: 22px;
+  font-weight: 550;
+}
+
+.meal-plan p {
+  margin: 0;
+  color: #65706b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.food-subhead {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.food-subhead span {
+  color: var(--terracotta-dark);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.food-subhead h3 {
+  margin: 0;
+  font-size: clamp(25px, 3vw, 38px);
+  font-weight: 500;
+}
+
 .food-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1463,6 +1544,10 @@ footer span {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .meal-plan {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .food-grid article {
     min-height: 230px;
   }
@@ -1570,6 +1655,20 @@ footer span {
 
   .food-grid {
     grid-template-columns: 1fr;
+  }
+
+  .meal-plan {
+    grid-template-columns: 1fr;
+  }
+
+  .meal-plan article {
+    min-height: 0;
+  }
+
+  .food-subhead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .food-grid article {
