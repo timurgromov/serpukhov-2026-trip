@@ -408,10 +408,6 @@ h3 {
   margin-bottom: 46px;
 }
 
-.section-head.compact {
-  margin-bottom: 32px;
-}
-
 .section-head > p:last-child {
   max-width: 680px;
   margin: 20px 0 0;
@@ -419,71 +415,6 @@ h3 {
   font-size: 17px;
 }
 
-.constraint-section {
-  padding-bottom: 0;
-}
-
-.alert-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.alert-card {
-  display: grid;
-  min-width: 0;
-  padding: 25px;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--white);
-}
-
-.alert-card.critical {
-  border-color: rgba(196, 87, 50, 0.35);
-  background: #fff8f4;
-}
-
-.alert-card.warning {
-  border-color: rgba(130, 102, 36, 0.3);
-  background: #fffbef;
-}
-
-.alert-icon {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--sand);
-  color: var(--ink);
-  font-weight: 850;
-}
-
-.critical .alert-icon {
-  background: var(--terracotta);
-  color: white;
-}
-
-.warning .alert-icon {
-  background: #e6c56e;
-}
-
-.alert-card h3 {
-  margin-bottom: 10px;
-  font-family: var(--sans);
-  font-size: 17px;
-  letter-spacing: -0.015em;
-}
-
-.alert-card p {
-  margin-bottom: 16px;
-  color: #5c625e;
-  font-size: 14px;
-}
-
-.alert-card a,
 .food-grid a,
 .optional-list a {
   color: var(--terracotta-dark);
@@ -885,11 +816,13 @@ h3 {
 
 .day-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
   gap: 22px;
 }
 
 .day-column {
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -1002,9 +935,9 @@ h3 {
 .timeline-copy > div {
   display: flex;
   margin-bottom: 6px;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .timeline-copy h4 {
@@ -1219,97 +1152,16 @@ h3 {
   padding-top: 0;
 }
 
-.meal-plan {
-  display: grid;
-  margin-bottom: 50px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.meal-plan article {
-  display: grid;
-  min-height: 150px;
-  padding: 22px;
-  grid-template-columns: 82px minmax(0, 1fr);
-  gap: 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: #f7f2ea;
-}
-
-.meal-plan article > div:first-child {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.meal-plan span {
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.meal-plan time {
-  color: var(--terracotta-dark);
-  font-family: var(--serif);
-  font-size: 22px;
-  line-height: 1;
-}
-
-.meal-plan strong {
-  color: var(--day-two);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.meal-plan h3 {
-  margin: 7px 0 8px;
-  font-size: 22px;
-  font-weight: 550;
-}
-
-.meal-plan p {
-  margin: 0;
-  color: #65706b;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.food-subhead {
-  display: flex;
-  margin-bottom: 16px;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.food-subhead span {
-  color: var(--terracotta-dark);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.food-subhead h3 {
-  margin: 0;
-  font-size: clamp(25px, 3vw, 38px);
-  font-weight: 500;
-}
-
 .food-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .food-grid article {
   display: flex;
-  min-height: 270px;
-  padding: 25px;
+  min-height: 245px;
+  padding: 30px;
   flex-direction: column;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -1527,25 +1379,16 @@ footer span {
     grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
   }
 
-  .alert-grid,
+  .day-grid {
+    grid-template-columns: 1fr;
+  }
+
   .lodging-grid {
     grid-template-columns: 1fr;
   }
 
-  .alert-card {
-    grid-template-columns: 36px minmax(0, 1fr);
-  }
-
   .lodging-card {
     min-height: 0;
-  }
-
-  .food-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .meal-plan {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .food-grid article {
@@ -1657,20 +1500,6 @@ footer span {
     grid-template-columns: 1fr;
   }
 
-  .meal-plan {
-    grid-template-columns: 1fr;
-  }
-
-  .meal-plan article {
-    min-height: 0;
-  }
-
-  .food-subhead {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-  }
-
   .food-grid article {
     min-height: 0;
   }
@@ -1777,14 +1606,6 @@ footer span {
   .booking-copy h2,
   .map-copy h2 {
     font-size: 39px;
-  }
-
-  .constraint-section {
-    padding-bottom: 0;
-  }
-
-  .alert-card {
-    padding: 20px;
   }
 
   .map-shell {

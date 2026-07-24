@@ -69,10 +69,8 @@ for (const [routeName, routes] of Object.entries(data.map.routes)) {
 }
 
 for (const section of [
-  "alerts",
   "dayTwoOptions",
   "lodgingOptions",
-  "mealPlan",
   "food",
   "optionalNotes",
   "bookingChecklist",

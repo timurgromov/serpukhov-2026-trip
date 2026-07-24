@@ -96,27 +96,6 @@ const navItems = [
         </div>
       </section>
 
-      <section class="section constraint-section" aria-labelledby="constraints-title">
-        <div class="section-head compact">
-          <p class="eyebrow">Что изменило маршрут</p>
-          <h2 id="constraints-title">Три ограничения, которые нельзя игнорировать</h2>
-        </div>
-        <div class="alert-grid">
-          {trip.alerts.map((alert) => (
-            <article class={`alert-card ${alert.level}`}>
-              <div class="alert-icon" aria-hidden="true">
-                {alert.level === "critical" ? "!" : alert.level === "warning" ? "≈" : "i"}
-              </div>
-              <div>
-                <h3>{alert.title}</h3>
-                <p>{alert.text}</p>
-                <a href={alert.sourceUrl} target="_blank" rel="noreferrer">{alert.sourceLabel} ↗</a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <div id="map">
         <RouteMap />
       </div>
@@ -230,28 +209,9 @@ const navItems = [
 
       <section id="food" class="section food-section">
         <div class="section-head">
-          <p class="eyebrow">Все приёмы пищи</p>
-          <h2>Еда встроена в маршрут</h2>
-          <p>Обедаем сразу после дороги, 29 июля завтракаем в «Овсянке», а ланч берём с собой — иначе ресторан после зубров сдвинет возвращение за 17:00.</p>
-        </div>
-        <div class="meal-plan" aria-label="График приёмов пищи">
-          {trip.mealPlan.map((item) => (
-            <article>
-              <div>
-                <span>{item.date}</span>
-                <time>{item.time}</time>
-              </div>
-              <div>
-                <strong>{item.meal}</strong>
-                <h3>{item.place}</h3>
-                <p>{item.note}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-        <div class="food-subhead">
-          <span>Подбор по географии</span>
-          <h3>Рестораны без лишних крюков</h3>
+          <p class="eyebrow">По пути</p>
+          <h2>Рестораны без лишних крюков</h2>
+          <p>Основные приёмы пищи уже стоят в расписании. Здесь — выбранные места и один запасной вариант.</p>
         </div>
         <div class="food-grid">
           {trip.food.map((place, index) => (
