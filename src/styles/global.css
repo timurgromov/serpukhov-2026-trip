@@ -611,21 +611,19 @@ h3 {
 }
 
 .map-filters {
-  display: flex;
+  display: grid;
   margin-bottom: 13px;
   padding-bottom: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
-  overflow-x: auto;
   border-bottom: 1px solid var(--line);
-  scrollbar-width: none;
-}
-
-.map-filters::-webkit-scrollbar {
-  display: none;
 }
 
 .map-filters button {
-  padding: 8px 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 6px;
+  text-align: center;
 }
 
 .route-list {
@@ -711,11 +709,13 @@ h3 {
 }
 
 .point-copy strong {
+  display: -webkit-box;
   overflow: hidden;
   color: var(--ink-deep);
   font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .point-copy small {
