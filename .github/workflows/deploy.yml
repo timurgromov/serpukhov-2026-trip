@@ -16,16 +16,48 @@ concurrency:
 
 jobs:
   build:
+    outputs:
+      build_s: ${{ steps.release.outputs.build_s }}
+      upload_s: ${{ steps.upload.outputs.upload_s }}
+      release_started: ${{ steps.release.outputs.release_started }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
+      - name: Start release timing
+        run: echo "RELEASE_STARTED=$(date +%s)" >> "$GITHUB_ENV"
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Install, build, and upload
-        uses: withastro/action@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Start build timing
+        run: echo "BUILD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Build site
+        run: npm run build
+      - name: Record exact release identity and build timing
+        id: release
+        run: |
+          node scripts/release-passport.mjs write dist
+          echo "build_s=$(( $(date +%s) - BUILD_STARTED ))" >> "$GITHUB_OUTPUT"
+          echo "release_started=$RELEASE_STARTED" >> "$GITHUB_OUTPUT"
+      - name: Start artifact upload timing
+        run: echo "UPLOAD_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+      - name: Record artifact upload timing
+        id: upload
+        run: echo "upload_s=$(( $(date +%s) - UPLOAD_STARTED ))" >> "$GITHUB_OUTPUT"
 
   deploy:
+    timeout-minutes: 10
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -35,3 +67,18 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Checkout release verification tool
+        uses: actions/checkout@v4
+
+      - name: Set up verification runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify the published commit and homepage
+        env:
+          RELEASE_UPLOAD_SECONDS: ${{ needs.build.outputs.upload_s }}
+          RELEASE_BUILD_SECONDS: ${{ needs.build.outputs.build_s }}
+          RELEASE_STARTED: ${{ needs.build.outputs.release_started }}
+        run: node scripts/release-passport.mjs verify "${{ steps.deployment.outputs.page_url }}" "$GITHUB_SHA"
